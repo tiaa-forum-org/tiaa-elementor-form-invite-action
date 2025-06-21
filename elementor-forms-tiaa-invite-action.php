@@ -3,7 +3,7 @@
  * Plugin Name: Elementor Forms/TIAA Invite Form Action
  * Description: An Elementor Pro form action for inviting new users to join tiaa-forum.org via the TIAA WordPress plugin.
  * Plugin URI:  https://tiaa-forum.org/
- * Version:     0.0.3
+ * Version:     0.0.4
  * Author:      Lew Grothe, TIAA Admin Platform Subteam
  * Author URI:  https://tiaa-forum.org
  * Text Domain: tiaa-invite-form-action
