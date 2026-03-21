@@ -95,10 +95,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         try {
                             if (response.success && response.status === 200) {
                                 if (response?.code === 'dropped_email') {
-                                    const statusDiv = document.querySelector('#tiaa_dropped_msg');
+                                    const statusDiv = document.querySelector('.tiaa_dropped_msg');
                                     statusDiv.style.display = 'none';
                                 } else {
-                                    tiaa_show_email_msg('#tiaa_success_msg',
+                                    tiaa_show_email_msg('.tiaa_success_msg',
                                         dataObject['form_fields[email]'] || 'No email provided');
                                 }
                             } else {
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         } catch (error) {
                             // Handle parsing or processing errors
                             console.error("Error processing response: ", error);
-                            tiaa_show_error_msg('#tiaa_error_unk_msg', error.message);
+                            tiaa_show_error_msg('.tiaa_error_unk_msg', error.message);
                         }
                     })
                     .catch((error) => {
@@ -115,13 +115,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         // Handle errors and update the status div
                         if (error?.status === 403 || error.message?.includes('403')) {
                             message = 'A configuration error occurred.';
-                            tiaa_show_error_msg('#tiaa_error_403_msg', message);
+                            tiaa_show_error_msg('.tiaa_error_403_msg', message);
                         } else if (error.message?.includes('already a member')) {
                             let email = dataObject['form_fields[email]'];
-                            tiaa_show_email_msg('#tiaa_duplicate_msg', email);
+                            tiaa_show_email_msg('.tiaa_duplicate_msg', email);
                         } else {
                             message = error.message || 'An unknown error occurred.';
-                            tiaa_show_error_msg('#tiaa_error_unk_msg', message);
+                            tiaa_show_error_msg('.tiaa_error_unk_msg', message);
                         }
                     });
             }, true); // set capture mode
@@ -155,28 +155,32 @@ document.addEventListener('DOMContentLoaded', () => {
  * embedding an email address within the message. It is used to inform the user about the
  * result of form submission, such as success or duplicate membership notification.
  *
- * @param {string} msg_id - A CSS selector for the target status message element to be displayed.
+ * @param {string} msgClass - A CSS selector for the target status message element to be displayed.
  * @param {string} email_value    - The email address to be displayed in the message.
  *
  * @example
  * // Example usage:
- * tiaa_show_email_msg('#tiaa_success_msg', 'user@example.com');
+ * tiaa_show_email_msg('.tiaa_success_msg', 'user@example.com');
  *
  * @since 0.0.3
  */
-function tiaa_show_email_msg(msg_id, email_value) {
+function tiaa_show_email_msg(msgClass, email_value) {
     //   console.log('show_email: ' + msg_id);
-    const statusDiv = document.querySelector(msg_id);
+    const divs = document.querySelectorAll(msgClass);
+    if (divs.length > 1) {
+        console.error('Multiple status divs found - expected only one');
+    }
+    const statusDiv = divs[0];
     if (statusDiv) {
         const emailDiv = statusDiv.querySelector('#email_value');
         if (emailDiv) {
             emailDiv.innerHTML = email_value;
         } else {
-            console.log('emailDiv not found in ' + msg_id);
+            console.log('emailDiv not found in ' + msgClass);
         }
         statusDiv.style.display = 'block';
      } else {
-        console.log('statusDiv not found in ' + msg_id);
+        console.log('statusDiv not found in ' + msgClass);
     }
 }
 /**
@@ -186,7 +190,7 @@ function tiaa_show_email_msg(msg_id, email_value) {
  * with the provided error message. It ensures the error message is visible to the user,
  * making it useful for conveying issues that occur during form submission or API interaction.
  *
- * @param {string} msg_id - A CSS selector for the target error message element to be updated and displayed.
+ * @param {string} msgClass - A CSS selector for the target error message element to be updated and displayed.
  * @param {string} err_msg  - The error message to be displayed in the targeted element.
  *
  * @example
@@ -195,18 +199,22 @@ function tiaa_show_email_msg(msg_id, email_value) {
  *
  * @since 0.0.3
  */
-function tiaa_show_error_msg(msg_id,err_msg) {
-    const statusDiv = document.querySelector(msg_id);
+function tiaa_show_error_msg(msgClass,err_msg) {
+    const divs = document.querySelectorAll(msgClass);
+    if (divs.length > 1) {
+        console.error('Multiple status divs found - expected only one');
+    }
+    const statusDiv = divs[0];
 //    console.log('show_error: ' + msg_id);
     if (statusDiv) {
         const errDiv = statusDiv.querySelector('#tiaa_error_msg');
         if (errDiv) {
             errDiv.innerHTML = err_msg;
         } else {
-            console.log('errDiv not found in ' + msg_id);
+            console.log('errDiv not found in ' + msgClass);
         }
         statusDiv.style.display = 'block';
     } else {
-        console.log('statusDiv not found in ' + msg_id);
+        console.log('statusDiv not found in ' + msgClass);
     }
 }
