@@ -3,7 +3,7 @@
  * Plugin Name: TIAA/Elementor Forms Invite Form Action
  * Description: An Elementor Pro form action for inviting new users to join tiaa-forum.org via the TIAA WordPress plugin.
  * Plugin URI:  https://tiaa-forum.org/
- * Version:     0.0.5
+ * Version:     0.0.6
  * Author:      Lew Grothe, TIAA Admin Platform Subteam
  * Author URI:  https://tiaa-forum.org
  * Text Domain: tiaa-invite-form-action
@@ -90,13 +90,25 @@ function register_tiaa_custom_form_action(  $form_actions_registrar ) : void {
 add_action( 'elementor_pro/forms/actions/register', 'register_tiaa_custom_form_action' );
 
 /**
- * Make Elementor Loop Item cards clickable on front page only
- * Adds a full-cover anchor link over the card container
+ * Make Elementor Loop Item cards clickable site-wide.
+ *
+ * Adds a full-cover transparent anchor overlay over each .e-loop-item card
+ * container, making the entire card clickable rather than just the title or
+ * button link inside it. The overlay links to the first <a> href found inside
+ * the card, which is typically the post title link.
+ *
+ * Runs on wp_footer on all front-end pages. The script is lightweight and
+ * self-contained — it only activates when .e-loop-item elements are present,
+ * so it is harmless on pages without Loop Grids.
+ *
+ * Previously restricted to is_front_page() only (v0.0.5). Extended site-wide
+ * in v0.0.6 to support Loop Grids on additional pages (e.g. Related Organizations,
+ * Hot Topics archive, Discourse Categories).
+ *
+ * @since 0.0.3
+ * @updated 0.0.6 — removed is_front_page() restriction; now runs site-wide.
  */
 add_action( 'wp_footer', function() {
-	if ( ! is_front_page() ) {
-		return;
-	}
 	?>
 	<script>
         document.querySelectorAll('.e-loop-item').forEach(function(card) {
