@@ -10,10 +10,10 @@ fi
 
 current_date=$(date "+%y%m%d%H%M")
 
-zip -r /tmp/elementor-forms-tiaa-invite-action.zip elementor-forms-tiaa-invite-action -x "*/bin/*" "*/.git/*"
+zip -r /tmp/tiaa-elementor-forms-invite-action.zip tiaa-elementor-forms-invite-action -x "*/bin/*" "*/.git/*"
 
-cp /tmp/elementor-forms-tiaa-invite-action.zip "${TIAA_BACKUP}/${current_date}-elementor-forms-tiaa-invite-action.zip"
+cp /tmp/tiaa-elementor-forms-invite-action.zip "${TIAA_BACKUP}/${current_date}tiaa-elementor-forms-invite-action.zip"
 
-cd ${TIAA_BACKUP}
+cd ${TIAA_BACKUP} || exit
 TIAA_BACKUP_DIR=$(pwd)
-echo "saved in ${TIAA_BACKUP_DIR}/${current_date}-elementor-forms-tiaa-invite-action.zip"
+echo "saved in ${TIAA_BACKUP_DIR}/${current_date}tiaa-elementor-forms-invite-action.zip"
