@@ -1,130 +1,150 @@
-# TIAA WordPress Plugin for Elementor Pro Form Invite Action 
-***This plugin replaces the deprecated `elementor-forms-tiaa-invite-action` plugin which must be removed.```***
-### Description
+# TIAA Elementor
 
-This plugin extends **Elementor Pro** to integrate with the [TIAA WordPress Plugin](https://tiaa-forum.org/). It offers a custom form action capability that allows administrators to create user invitation workflows, sending new user invites directly to the TIAA Forum via Elementor Pro forms.
+Elementor Pro extensions for tiaa-forum.org.
 
-This form action was necessary since the WebHook action available in Elementor Pro only allows return values of Success or Failure. However, we wanted to be able to immediately respond differently to a new member's input based on whether the email had already been registered or if one of a few error conditions occurred.
+This plugin supersedes the plugin formerly named `tiaa-elementor-forms-invite-action`.
+**That plugin must be deactivated and removed before activating this one.**
 
-This plugin is designed to work **in conjunction with** the [TIAA WordPress Plugin](https://tiaa-forum.org/) and assumes it is already installed and configured. For additional functionality provided by the TIAA WordPress Plugin, please refer to its documentation.
-
-This plugin also enables functionality wherein Elementor `loop grid card widget` becomes clickable to display the post associated with the card.
 ---
 
 ## Features
-### Elementor Form Action
-- **New Elementor Pro Form Action:** Adds a custom action `TIAA Invite` for Elementor Pro Forms to process invitations to the TIAA Forum.
-- **Effortless User Onboarding:** Integrates directly with the TIAA Forum's backend to handle user invitations seamlessly.
-- **REST API Integration:** Provides a REST endpoint for managing form submissions and connecting with the TIAA Forum.
-- **Zero-Code Configuration:** Simple setup and integration via Elementor Pro's Form editor.
-### Make Elementor Pro Loop Grid Widget clickable
-- **Site-wide clickable Loop Grid cards:** All Elementor Loop Item cards across the site are made fully clickable via a lightweight footer script.
+
+### Discourse invite form action
+Adds a custom Elementor Pro form action called `TIAA Invite` that triggers the Discourse invite
+flow via the TIAA WordPress Plugin API. This was necessary because Elementor Pro's built-in
+Webhook action can only return success or failure, whereas the TIAA invite API returns several
+distinct outcomes (new invite sent, already registered, error states) that each require agit a
+different response to the visitor.
+
+When a form with the `tiaa` submit action is rendered, a lightweight JavaScript handler
+(`assets/js/form-handler.js`) is enqueued. It intercepts the form submission, calls the TIAA
+REST endpoint, and updates the page according to the API response — bypassing Elementor Pro's
+standard Ajax handler entirely.
+
+### Site-wide clickable Loop Grid cards
+All Elementor Loop Item cards (`.e-loop-item`) across the site are made fully clickable via a
+lightweight footer script (`loop-grid/clickable-cards.php`). A transparent anchor overlay covers
+the entire card and links to the first `<a>` href found inside it — typically the post title link.
+The script is harmless on pages with no Loop Grid widgets.
+
+Pages currently benefiting from clickable cards:
+- Homepage — Hot Topics preview and Forum Categories grids
+- Hot Topics archive (`/hot-topics/`)
+- Related Organizations (`/related-orgs/` or embedded on `/resources/`)
+- Any future page using an Elementor Loop Grid widget
 
 ---
 
 ## Requirements
 
-These requirements make sense (the plugin won't work without close links to Elementor Pro and the TIAA-WPPlugin). However, specifying them in the plugin code (e.g., in tiaa-elementor-forms-invite-action.php) and the automatic dependencies enforced by WordPress make it at least problematic and maybe impossible to do upgrades and configuration changes to any of the three plugins.
-
 ### WordPress
-- WordPress Version: **6.0** or higher
-- PHP Version: **7.1.0** or higher
+- WordPress: **6.0** or higher
+- PHP: **7.4** or higher
 
-### Required Plugins
-- [TIAA WordPress Plugin](https://tiaa-forum.org/) (refer to its documentation for setup and configuration)
+### Required plugins
+- [TIAA WordPress Plugin](https://tiaa-forum.org/) — provides the invite REST API
 - [Elementor](https://elementor.com/)
 - [Elementor Pro](https://elementor.com/pro)
+
+> **Note on dependency enforcement:** Declaring hard plugin dependencies in code creates
+> problems for upgrading any of the three plugins independently. Requirements are therefore
+> documented here rather than enforced programmatically.
 
 ---
 
 ## Installation
 
-1. Ensure **Elementor** and **Elementor Pro** are installed and activated.
-2. Install and activate the **TIAA WordPress Plugin** (see the [documentation](https://tiaa-forum.org/)).
-3. Download or clone this plugin to your WordPress plugins directory (typically `/wp-content/plugins`).
-4. Activate this plugin via `Plugins > Installed Plugins` in your WordPress dashboard.
+1. Ensure **Elementor**, **Elementor Pro**, and the **TIAA WordPress Plugin** are installed and
+   active.
+2. Deactivate and delete the old `tiaa-elementor-forms-invite-action` plugin if present.
+3. Clone or copy this plugin to `wp-content/plugins/tiaa-elementor/`.
+4. Activate via **Plugins › Installed Plugins** in the WordPress dashboard.
 
 ---
 
 ## Usage
 
-### Add the TIAA Invite Form Action
-1. Navigate to Elementor and create or edit a form.
-2. In the "Actions After Submit" dropdown, add the new action called `TIAA Invite`.
-3. Configure the form fields:
-    - Map the **email field** to collect the email addresses of users to be invited.
-    - Optionally, add custom form fields if needed for your workflow.
-4. Publish the form and test submissions.
+### Adding the TIAA Invite form action
 
-### How it Works
-- When a form is submitted, this plugin triggers an API call to the TIAA WordPress Plugin's invite system.
-    - The form requires an Elementor Pro `form-action` of `TIAA-invite` after submission that causes some JavaScript code to be loaded that completely bypasses the Elementor Pro Ajax API handler (e.g., fetch...)
-    - To circumvent the normal form submission process, we need to stub out a response from the handler (always success). Then let this plugin's JavaScript respond, according to the 3–4 expected responses from the TIAA plugin for an invitation request to Discourse.
-- The TIAA plugin processes the submission by communicating with the TIAA Forum Discourse server to send invitations to the email address on the submitted form.
+1. Open Elementor and create or edit a form widget.
+2. In the **Actions After Submit** setting, add the `TIAA Invite` action.
+3. Map the **email** field to the visitor's email input.
+4. Publish and test a submission.
 
-### Clickable Loop Grid Cards
+The form handler script is enqueued automatically — only on pages where a form with the `tiaa`
+action is rendered.
 
-As of v0.0.6, this plugin makes all Elementor Loop Item cards (`.e-loop-item`) fully clickable site-wide. A transparent anchor overlay covers the entire card, linking to the first `<a>` href found inside — typically the `post title` link. This eliminates the need for visitors to click precisely on the title or button.
+### Clickable Loop Grid cards
 
-The script runs in `wp_footer` on all front-end pages. It is lightweight and self-contained — it only activates when `.e-loop-item` elements are present, so it is harmless on pages without Loop Grids.
-
-**Pages currently using Loop Grids that benefit from this:**
-- Homepage (Hot Topics preview, Forum Categories)
-- Hot Topics archive (`/hot-topics/`)
-- Related Organizations (`/related-orgs/` or embedded on `/resources/`)
+No configuration required. The overlay script runs automatically site-wide. Any page that
+contains `.e-loop-item` elements gains fully clickable cards.
 
 ---
 
-## File Structure Overview
+## File Structure
 
-| File                                     | Functionality                                                                                 |
-|------------------------------------------|-----------------------------------------------------------------------------------------------|
-| `tiaa-elementor-forms-invite-action.php` | Registers the custom Elementor Pro form action `TIAA Invite` and site-wide clickable card JS. |
-| `form-action/tiaa-invite.php`            | Executes form actions to connect Elementor forms with the TIAA API.                           |
-| `assets/js/form-handler.js`              | Handles REST API requests for form-related functionality.                                     |
-| `README.md`                              | This file.                                                                                    |
-| `LICENSE.md`                             | License boilerplate.                                                                          |
+```
+tiaa-elementor/
+├── tiaa-elementor.php              # Plugin entry point — registers all features
+├── loop-grid/
+│   └── clickable-cards.php         # Site-wide clickable card overlay script
+├── form-action/
+│   └── tiaa-invite-action.php      # Elementor Pro form action class
+├── assets/js/
+│   └── form-handler.js             # Invite form REST handler (client-side)
+├── README.md                       # This file
+└── LICENSE.md
+```
 
 ---
 
 ## Changelog
 
+### 0.0.8 — 2026-04-18
+- **Renamed** plugin from `tiaa-elementor-forms-invite-action` to `tiaa-elementor`.
+  Plugin slug, text domain, and directory name all updated.
+- **Extracted** clickable Loop Grid card script from the main plugin file into
+  `loop-grid/clickable-cards.php`. Logic is unchanged; this is a structural refactor
+  to keep Elementor extensions organised by feature as the plugin grows.
+- Removed duplicate clickable card `add_action` from `tiaa-wpplugin` (was already
+  superseded by the site-wide version in v0.0.6).
+- Renamed global form-action registration function from
+  `register_tiaa_custom_form_action` to `tiaa_elementor_register_invite_form_action`
+  to avoid collision risk with other plugins.
+
+### 0.0.7
+- Previous stable release under the old plugin name.
+
 ### 0.0.6 — 2026-03-29
-- Removed `is_front_page()` restriction from a clickable Loop Grid card JavaScript script.
+- Removed `is_front_page()` restriction from clickable Loop Grid card script.
   Cards are now clickable site-wide on any page containing `.e-loop-item` elements.
-  Previously only applied to the homepage.
 
 ### 0.0.5
-- Previous stable release.
-- Clickable cards are restricted to the front page only.
+- Clickable cards restricted to the front page only.
 
 ---
 
 ## Development & Contributions
 
-### Prerequisites
-- WordPress development environment installed and running.
-
-### Testing
-Ensure to test the plugin alongside:
-- **TIAA WordPress Plugin**: Invite functionality must interact properly with its API.
-- **Elementor Pro**: The `TIAA Invite` action must be available and functional.
-- **Loop Grid pages**: Verify clickable card overlay works on homepage, Hot Topics archive, and Related Organizations.
+### Testing checklist
+- **TIAA WordPress Plugin API** — invite form must send and receive responses correctly.
+- **Elementor Pro** — `TIAA Invite` action must appear in the Actions After Submit dropdown.
+- **Loop Grid pages** — verify clickable card overlay on homepage, Hot Topics archive, and
+  Related Organizations; confirm no JavaScript errors on pages without Loop Grids.
 
 ### Contributions
-We welcome contributions! Follow these steps:
 1. Fork the repository.
-2. Create a feature branch for your updates.
-3. Submit a pull request with a descriptive explanation of changes.
+2. Create a feature branch.
+3. Submit a pull request with a clear description of changes.
 
 ---
 
 ## License
 
-This plugin is licensed under the **GPL v2.0 or later**. See the `LICENSE.md` file for full details.
+GPLv2 or later. See `LICENSE.md` for full terms.
 
 ---
 
 ## Support
 
-For issues, feature requests, or feedback, please contact the TIAA Forum Admin Platform Sub-Team via https://tiaa-forum.org/contact.
+Contact the TIAA Forum Admin Platform Sub-Team via https://tiaa-forum.org/contact.
