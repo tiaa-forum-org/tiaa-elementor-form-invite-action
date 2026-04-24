@@ -37,12 +37,12 @@ add_action( 'wp_footer', function () {
 	?>
 	<script>
         document.querySelectorAll('.e-loop-item').forEach(function(card) {
-            var link = card.querySelector('a');
+            const link = card.querySelector('a');
             if (link) {
-                var url = link.href;
+                const url = link.href;
                 card.style.position = 'relative';
                 card.style.cursor = 'pointer';
-                var overlay = document.createElement('a');
+                const overlay = document.createElement('a');
                 overlay.href = url;
                 overlay.style.cssText = 'position:absolute;inset:0;z-index:1;';
                 overlay.setAttribute('aria-hidden', 'true');
